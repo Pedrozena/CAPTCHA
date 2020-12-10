@@ -1,0 +1,18 @@
+{
+	"name": "Run CAPTCHA ms on Docker",
+
+	"dockerFile": "../Dockerfile",
+
+	"context": "..",
+
+	"service": "captcha",
+
+	"workspaceFolder": "/workspace",
+
+	"extensions": ["ms-python.python"],
+
+	"mounts": [
+		"source=${localWorkspaceFolder}\\src,target=/workspace/src,type=bind,consistency=cached",
+		"source=${localWorkspaceFolder}\\.vscode,target=/workspace/.vscode,type=bind,consistency=cached"
+		]
+}

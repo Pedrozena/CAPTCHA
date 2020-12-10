@@ -1,0 +1,8 @@
+services:
+  captcha:
+    build:
+      dockerfile: ./Dockerfile
+      context: ./
+    image: cr.pedrozena.io/test/captcha:local
+    ports: 
+      - 8000:8000
