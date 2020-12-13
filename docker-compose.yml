@@ -13,6 +13,7 @@ services:
       - ./src:/workspace/src
       - ./.vscode:/workspace/.vscode
       - ./settings.yml:/workspace/settings.yml
+      - ./test:/workspace/test
 
   postgres:
     image: postgres:11
