@@ -6,3 +6,15 @@ services:
     image: cr.pedrozena.io/test/captcha:local
     ports: 
       - 8000:8000
+    depends_on:
+      - postgres
+    entrypoint: "tail -f /dev/null"
+    volumes:
+      - ./src:/workspace/src
+      - ./.vscode:/workspace/.vscode
+      - ./settings.yml:/workspace/settings.yml
+
+  postgres:
+    image: postgres:11
+    environment:
+      POSTGRES_PASSWORD: postgres
