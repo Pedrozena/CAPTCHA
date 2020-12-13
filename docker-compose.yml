@@ -18,3 +18,5 @@ services:
     image: postgres:11
     environment:
       POSTGRES_PASSWORD: postgres
+    ports:
+      - 5432:5432

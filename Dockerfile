@@ -9,6 +9,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 WORKDIR /opt/pedrozena/captcha
 COPY ./src ./src
 COPY ./requirements.txt .
+COPY ./settings.yml .
 
 RUN pip install --no-cache-dir -r requirements.txt
 ENV PYTHONPATH=/opt/pedrozena/captcha
