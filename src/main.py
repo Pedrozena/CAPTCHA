@@ -10,10 +10,11 @@ import uvicorn
 import urllib.request
 import json
 import hashlib 
-from datetime import datetime
+from time import time 
 from fastapi.logger import logger
 from captcha.image import ImageCaptcha
 from fastapi.responses import StreamingResponse
+from fastapi_utils.tasks import repeat_every
 
 ImageGenerator = ImageCaptcha(width=500, height=200)
 
@@ -41,17 +42,15 @@ async def appDefinition(db_settings):
                 break
             except urllib.error.HTTPError:
                 cnt += 1
-                if cnt > 20:
+                if cnt > 10:
                     response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
                     return False
                 asyncio.sleep(0.2)
         secret = " ".join(json.loads(content.decode('utf-8')))
         img = ImageGenerator.generate(secret)
         fingerprint = hashlib.md5(img.read()).hexdigest()
-        print(fingerprint)
         img.seek(0)
         async with db.transaction():
-            dt = datetime.now()
             await db.execute("INSERT INTO captcha VALUES('"+fingerprint+"', '"+secret+"', current_timestamp)")
         return StreamingResponse(img, media_type="image/png") 
 
@@ -61,22 +60,35 @@ async def appDefinition(db_settings):
         fingerprint = hashlib.md5(await image.read()).hexdigest()
         async with db.transaction():
             res = await db.fetchrow("SELECT secret FROM captcha WHERE hash = '"+fingerprint+"'")
-            if secret == res[0]:
-                return True
-            else:
+            if res is None:
+                response.status_code = status.HTTP_404_NOT_FOUND
+                return False
+            if secret != res[0]:
                 response.status_code = status.HTTP_406_NOT_ACCEPTABLE
                 return False
+            if secret == res[0]:
+                return True
 
-    try:
+    @app.on_event("startup")
+    async def startupEvent():
+        try:
+            db = await getDb()
+        except OSError as e:
+            sys.exit(str(e))
+        try:
+            await db.execute("CREATE TABLE captcha (hash text, secret text, timestamp timestamp);")
+            logger.info("Database created")
+        except asyncpg.DuplicateTableError:
+            logger.info("Database creation skipped")
+            pass
+
+    @app.on_event("startup")
+    @repeat_every(seconds=60*60)
+    async def garbageCollector():
         db = await getDb()
-    except OSError as e:
-        sys.exit(str(e))
-    try:
-        await db.execute("CREATE TABLE captcha (hash text, secret text, timestamp timestamp);")
-        logger.info("Database created")
-    except asyncpg.DuplicateTableError:
-        logger.info("Database creation skipped")
-        pass
+        async with db.transaction():
+            res = await db.execute("DELETE FROM captcha WHERE timestamp < now() - interval '1 hour'")
+            logger.info("Old instances cleaned from DB: "+ res)
     
     return app
 
@@ -92,7 +104,8 @@ if __name__ == "__main__":
         settings = yaml.safe_load(stream)
     db_settings = settings.get("db", {})
     service_settings = settings.get("service", {})
-    
+
     loop = asyncio.get_event_loop()
     app = loop.run_until_complete(appDefinition(db_settings))
+
     uvicorn.run(app, host=service_settings["host"], port=service_settings["port"], log_level="info")
