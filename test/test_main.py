@@ -1,5 +1,5 @@
 from fastapi.testclient import TestClient
-from .. src.main import appDefinition
+from src.main import appDefinition
 import asyncio
 
 
