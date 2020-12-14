@@ -48,7 +48,7 @@ async def appDefinition(db_settings, forceDBInit=False):
     )
 
     async def getDb(user=db_settings["user"], password=db_settings["password"], 
-        database=db_settings["database"], host=db_settings["host"], port=db_settings["port"]):
+        database=db_settings["database"], host=db_settings["host"], port=db_settings.get("port", 5432)):
         '''
         Return a new connection to the database configured in the settings file.
         '''
@@ -56,15 +56,15 @@ async def appDefinition(db_settings, forceDBInit=False):
         while True:
             try:
                 return await asyncpg.connect(user=user, password=password,
-                    database=database, host=host)
+                    database=database, host=host, port=port)
                 break
             except Exception as e:
                 cnt += 1
                 if cnt > RETRY:
                     logger.error(str(e))
                     sys.exit(-1)
-                logger.info("unable to connect to "+host+str(port)+" DB (retrying "+cnt+" of "+str(RETRY)+")")
-                asyncio.sleep(0.5)
+                logger.info("unable to connect to "+host+":"+str(port)+" DB (retrying "+str(cnt)+" of "+str(RETRY)+")")
+                await asyncio.sleep(1)
 
     async def getDbDependencies():
         '''
@@ -130,7 +130,7 @@ async def appDefinition(db_settings, forceDBInit=False):
                 if cnt > RETRY:
                     response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
                     return False
-                asyncio.sleep(0.2)
+                await asyncio.sleep(0.2)
         secret = " ".join(json.loads(content.decode('utf-8')))
         img = ImageGenerator.generate(secret)
         fingerprint = hashlib.md5(img.read()).hexdigest()

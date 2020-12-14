@@ -11,8 +11,7 @@ test_db = {
     "user" : "postgres",
     "password" : "postgres",
     "host" : "postgres",
-    "database" : "postgres",
-    "port": "5432"
+    "database" : "postgres"
 }
 
 
