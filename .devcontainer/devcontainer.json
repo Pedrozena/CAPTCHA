@@ -5,6 +5,8 @@
 
 	"service": "captcha-dev",
 
+	"runServices" : ["captcha-dev", "postgres"],
+
 	"workspaceFolder": "/workspace",
 
 	"extensions": ["ms-python.python"],
