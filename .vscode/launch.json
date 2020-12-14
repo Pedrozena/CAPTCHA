@@ -11,7 +11,7 @@
             "program": "src/main.py",
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
-            "justMyCode": false,
+            "justMyCode": false
         },
         {
             "name": "[PYTHON]: ms test",

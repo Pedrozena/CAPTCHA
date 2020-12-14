@@ -1,4 +1,5 @@
 fastapi
+fastapi_utils
 uvicorn
 captcha
 asyncpg

@@ -3,9 +3,16 @@
 
 	"dockerComposeFile": ["../docker-compose.yml"],
 
-	"service": "captcha",
+	"service": "captcha-dev",
 
 	"workspaceFolder": "/workspace",
 
 	"extensions": ["ms-python.python"],
+
+	"postCreateCommand": "pip install -r requirements-test.txt",
+
+	// uncomment following lines for enabling pytest from /workspace
+	// "remoteEnv": {
+	// 	"PYTHONPATH": "/workspace/src",
+	// }
 }

@@ -1,20 +1,39 @@
 services:
-  captcha:
+  captcha-dev:
     build:
       dockerfile: ./Dockerfile
       context: ./
     image: cr.pedrozena.io/test/captcha:local
+    entrypoint: "tail -f /dev/null"
     ports: 
       - 8000:8000
     depends_on:
       - postgres
-    entrypoint: "tail -f /dev/null"
     volumes:
       - ./src:/workspace/src
       - ./.vscode:/workspace/.vscode
       - ./settings.yml:/workspace/settings.yml
       - ./test:/workspace/test
+      - ./requirements-test.txt:/workspace/requirements-test.txt
+    environment:
+      DB_PASSWORD : postgres
+      DB_PORT : 5432
+      SERVICE_HOST : 0.0.0.0
+      SERVICE_PORT : 8000
+  
+  captcha:
+    image: cr.pedrozena.io/test/captcha:local
+    ports: 
+      - 8088:8088
+    depends_on:
+      - postgres
+    environment:
+      DB_PASSWORD : postgres
+      DB_PORT : 5432
+      SERVICE_HOST : 0.0.0.0
+      SERVICE_PORT : 8088
 
+  
   postgres:
     image: postgres:11
     environment:
