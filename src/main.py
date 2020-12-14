@@ -10,11 +10,13 @@ import uvicorn
 import urllib.request
 import json
 import hashlib 
+import logging
 from time import time 
-from fastapi.logger import logger
 from captcha.image import ImageCaptcha
 from fastapi.responses import StreamingResponse
 from fastapi_utils.tasks import repeat_every
+
+logger = logging.getLogger("uvicorn.error")
 
 ImageGenerator = ImageCaptcha(width=500, height=200)
 
