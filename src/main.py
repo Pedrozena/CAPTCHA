@@ -48,7 +48,7 @@ async def appDefinition(db_settings, forceDBInit=False):
     )
 
     async def getDb(user=db_settings["user"], password=db_settings["password"], 
-        database=db_settings["database"], host=db_settings["host"]):
+        database=db_settings["database"], host=db_settings["host"], port=db_settings["port"]):
         '''
         Return a new connection to the database configured in the settings file.
         '''
