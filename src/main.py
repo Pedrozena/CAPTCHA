@@ -27,7 +27,8 @@ RETRY = 10
 async def appDefinition(db_settings, forceDBInit=False):
     '''
     Definition of FastAPI app object and its route handler.
-    forceDBInit allow to programatically start the Database creation.
+    -forceDBInit allows to programatically start the Database creation,
+        anticipatin FastAPI startup event
     '''
     tags_metadata = [
         {
@@ -57,7 +58,6 @@ async def appDefinition(db_settings, forceDBInit=False):
             try:
                 return await asyncpg.connect(user=user, password=password,
                     database=database, host=host, port=port)
-                break
             except Exception as e:
                 cnt += 1
                 if cnt > RETRY:
@@ -98,7 +98,6 @@ async def appDefinition(db_settings, forceDBInit=False):
         '''
         await createDb()
         
-
     @app.on_event("startup")
     @repeat_every(seconds=60*60)
     async def garbageCollector():
