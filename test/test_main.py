@@ -17,7 +17,7 @@ test_db = {
 
 
 loop = asyncio.get_event_loop()
-app = loop.run_until_complete(appDefinition(test_db))
+app = loop.run_until_complete(appDefinition(test_db, forceDBInit=True))
 
 client = TestClient(app)
 

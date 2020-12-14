@@ -20,9 +20,15 @@ logger = logging.getLogger("uvicorn.error")
 
 ImageGenerator = ImageCaptcha(width=500, height=200)
 
+RETRY = 10
 
 
-async def appDefinition(db_settings):
+
+async def appDefinition(db_settings, forceDBInit=False):
+    '''
+    Definition of FastAPI app object and its route handler.
+    forceDBInit allow to programatically start the Database creation.
+    '''
     tags_metadata = [
         {
             "name": "generate",
@@ -46,12 +52,19 @@ async def appDefinition(db_settings):
         '''
         Return a new connection to the database configured in the settings file.
         '''
-        try:
-            return await asyncpg.connect(user=user, password=password,
-                database=database, host=host)
-        except Exception as e:
-            logger.error(str(e))
-            sys.exit(-1)
+        cnt = 0
+        while True:
+            try:
+                return await asyncpg.connect(user=user, password=password,
+                    database=database, host=host)
+                break
+            except Exception as e:
+                cnt += 1
+                if cnt > RETRY:
+                    logger.error(str(e))
+                    sys.exit(-1)
+                logger.info("unable to connect to "+host+str(port)+" DB (retrying "+cnt+" of "+str(RETRY)+")")
+                asyncio.sleep(0.5)
 
     async def getDbDependencies():
         '''
@@ -63,10 +76,9 @@ async def appDefinition(db_settings):
         finally:
             await db.close()
 
-    @app.on_event("startup")
-    async def startupEvent():
+    async def createDb():
         '''
-        Action to be performed at server startup. Initialize the database,
+        Initialize the database writing the table definition.
         '''
         try:
             db = await getDb()
@@ -78,6 +90,14 @@ async def appDefinition(db_settings):
         except asyncpg.DuplicateTableError:
             logger.info("Database initialization skipped")
             pass
+
+    @app.on_event("startup")
+    async def startupEvent():
+        '''
+        Action to be performed at server startup. Initialize the database
+        '''
+        await createDb()
+        
 
     @app.on_event("startup")
     @repeat_every(seconds=60*60)
@@ -107,7 +127,7 @@ async def appDefinition(db_settings):
                 break
             except urllib.error.HTTPError:
                 cnt += 1
-                if cnt > 10:
+                if cnt > RETRY:
                     response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
                     return False
                 asyncio.sleep(0.2)
@@ -151,6 +171,9 @@ async def appDefinition(db_settings):
         '''
         return {"Description": "CAPTCHA microservice. visit "+str(request.base_url)+"docs/ for documentation"}
     
+    if forceDBInit:
+        await createDb()
+
     return app
 
 if __name__ == "__main__":
