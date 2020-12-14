@@ -20,18 +20,19 @@ logger = logging.getLogger("uvicorn.error")
 
 ImageGenerator = ImageCaptcha(width=500, height=200)
 
-tags_metadata = [
-    {
-        "name": "generate",
-        "description": "Generate a CAPTCHA",
-    },
-    {
-        "name": "validate",
-        "description": "Validate a CAPTCHA against the provided secret",
-    },
-]
+
 
 async def appDefinition(db_settings):
+    tags_metadata = [
+        {
+            "name": "generate",
+            "description": "Generate a CAPTCHA",
+        },
+        {
+            "name": "validate",
+            "description": "Validate a CAPTCHA against the provided secret",
+        },
+    ]
     app = FastAPI(
         title="CAPTCHA",
         description="HTTP server for generate and validate a CAPTCHA",
