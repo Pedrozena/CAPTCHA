@@ -26,7 +26,7 @@ RETRY = 10
 
 async def appDefinition(db_settings, forceDBInit=False):
     '''
-    Definition of FastAPI app object and its route handler.
+    Definition of FastAPI app object and its route handlers.
     -forceDBInit allows to programatically start the Database creation,
         anticipatin FastAPI startup event
     '''
@@ -68,7 +68,7 @@ async def appDefinition(db_settings, forceDBInit=False):
 
     async def getDbDependencies():
         '''
-        Return a new connection to the database as a FastAPI dependencies.
+        Return a new connection to the database as a FastAPI dependency.
         '''
         db = await getDb()
         try:
@@ -94,7 +94,7 @@ async def appDefinition(db_settings, forceDBInit=False):
     @app.on_event("startup")
     async def startupEvent():
         '''
-        Action to be performed at server startup. Initialize the database
+        Actions to be performed at server startup. Initialize the database
         '''
         await createDb()
         
@@ -102,7 +102,7 @@ async def appDefinition(db_settings, forceDBInit=False):
     @repeat_every(seconds=60*60)
     async def garbageCollector():
         '''
-        Action to be performed each n seconds. It delete old instances (CAPTCHA images generated) from the database
+        Actions to be performed each n seconds. It delete old instances (CAPTCHA images generated) from the database
         '''
         db = await getDb()
         async with db.transaction():
@@ -116,7 +116,7 @@ async def appDefinition(db_settings, forceDBInit=False):
     async def generate(response: Response, db: asyncpg.Connection = Depends(getDbDependencies)):
         '''
         \f
-        Generate a new captcha using ImageCaptcha module.
+        Generate a new captcha image using ImageCaptcha module.
         It store in the support DB the md5 hash of the given captcha, togheter with its secret.
         '''
         cnt = 0
