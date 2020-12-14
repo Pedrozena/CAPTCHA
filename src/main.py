@@ -36,7 +36,7 @@ async def appDefinition(db_settings):
             await db.close()
 
     @app.get("/generate/")
-    async def generate(response: Response, db: asyncpg.pool = Depends(getDbDependencies)):
+    async def generate(response: Response, db: asyncpg.Connection = Depends(getDbDependencies)):
         cnt = 0
         while True:
             try:
@@ -58,7 +58,7 @@ async def appDefinition(db_settings):
 
     @app.post("/validate/")
     async def validate(secret: str, response: Response, image: UploadFile = File(...), 
-        db: asyncpg.pool = Depends(getDbDependencies)):
+        db: asyncpg.Connection = Depends(getDbDependencies)):
         fingerprint = hashlib.md5(await image.read()).hexdigest()
         async with db.transaction():
             res = await db.fetchrow("SELECT secret FROM captcha WHERE hash = '"+fingerprint+"'")
