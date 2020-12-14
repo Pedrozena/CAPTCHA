@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, UploadFile, Depends, Response, status
+from fastapi import FastAPI, File, UploadFile, Depends, Response, status, Request
 import uvicorn
 import yaml
 import argparse
@@ -95,6 +95,10 @@ async def appDefinition(db_settings):
         async with db.transaction():
             res = await db.execute("DELETE FROM captcha WHERE timestamp < now() - interval '1 hour'")
             logger.info("Old instances cleaned from DB: "+ res)
+
+    @app.get("/")
+    def read_root(request: Request):
+        return {"Description": "CAPTCHA microservice. visit "+str(request.base_url)+"docs/ for documentation"}
     
     return app
 

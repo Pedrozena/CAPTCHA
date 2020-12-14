@@ -21,6 +21,10 @@ app = loop.run_until_complete(appDefinition(test_db))
 
 client = TestClient(app)
 
+def test_get_home():
+    response = client.get("/")
+    assert response.status_code == 200
+
 def test_get_generate():
     response = client.get("/generate")
     assert response.status_code == 200
