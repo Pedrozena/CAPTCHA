@@ -59,7 +59,11 @@ Please override PYTHONPATH env variable with
     $ /workspace/src 
 
 to enable pytest run from command-line (you can uncomment the related option in .devcontainer.json to achieve this).
+In order to install all the python dependencies related to the test, please launch:
 
+    $ pip install -r requirements-test.txt
+
+This command is automatically triggered while debugging in vscode opened in container.
 ### Documentation
 
 You can find the documentation automatically served by FastAPI (provided by Swagger) by visiting ```http://host:port/docs``` while the microservice is up & running
