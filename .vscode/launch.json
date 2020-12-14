@@ -11,7 +11,7 @@
             "program": "src/main.py",
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
-            "justMyCode": false
+            "justMyCode": false,
         },
         {
             "name": "[PYTHON]: ms test",
@@ -20,7 +20,10 @@
             "module": "pytest",
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
-            "justMyCode": false
+            "justMyCode": false,
+            "env": {
+                "PYTHONPATH" : "${workspaceFolder}/src"
+            }
         }
     ]
 }

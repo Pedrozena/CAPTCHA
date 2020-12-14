@@ -1,6 +1,5 @@
 from fastapi import FastAPI, File, UploadFile, Depends, Response, status
 import uvicorn
-import os
 import yaml
 import argparse
 import asyncpg
@@ -15,6 +14,7 @@ from time import time
 from captcha.image import ImageCaptcha
 from fastapi.responses import StreamingResponse
 from fastapi_utils.tasks import repeat_every
+from ut import envOverride
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -25,8 +25,12 @@ async def appDefinition(db_settings):
 
     async def getDb(user=db_settings["user"], password=db_settings["password"], 
         database=db_settings["database"], host=db_settings["host"]):
-        return await asyncpg.connect(user=user, password=password,
-            database=database, host=host)
+        try:
+            return await asyncpg.connect(user=user, password=password,
+                database=database, host=host)
+        except Exception as e:
+            logger.error(str(e))
+            sys.exit(-1)
 
     async def getDbDependencies():
         db = await getDb()
@@ -103,11 +107,11 @@ if __name__ == "__main__":
     parser.add_argument('-f', '--settingsFile', type=str, nargs=1, help=settings, default=["./settings.yml"])
     args = parser.parse_args()
     with open(args.settingsFile[0], 'r') as stream:
-        settings = yaml.safe_load(stream)
+        settings = envOverride(yaml.safe_load(stream))
     db_settings = settings.get("db", {})
     service_settings = settings.get("service", {})
 
     loop = asyncio.get_event_loop()
     app = loop.run_until_complete(appDefinition(db_settings))
 
-    uvicorn.run(app, host=service_settings["host"], port=service_settings["port"], log_level="info")
+    uvicorn.run(app, host=service_settings["host"], port=int(service_settings["port"]), log_level="info")
